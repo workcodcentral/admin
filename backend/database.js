@@ -5,12 +5,10 @@ const { Pool } = require('pg');
 
 // Create a connection pool using environment variables
 const pool = new Pool({
-    user: process.env.DB_USER,       // set in Render environment
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT || 5432,
+  connectionString: process.env.DATABASE_URL || 'postgresql://codcentral_db_user:mgI57sqlxZOCoZh25xoleWCKuBX5gMbF@dpg-d4976e2li9vc739mru60-a.oregon-postgres.render.com/codcentral_db',
+  ssl: { rejectUnauthorized: false }
 });
+
 
 // ============================================
 // TEST DATABASE CONNECTION
