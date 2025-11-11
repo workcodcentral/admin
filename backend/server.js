@@ -19,7 +19,7 @@ app.use(
 // ===========================
 // STATIC FRONTEND HANDLER
 // ===========================
-const frontendPath = path.join(__dirname, '../frontend');
+const frontendPath = path.join(__dirname, 'frontend');
 app.use(express.static(frontendPath));
 
 // Default route (login page)
@@ -63,3 +63,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
+
