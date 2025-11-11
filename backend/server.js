@@ -1,51 +1,65 @@
 const express = require('express');
-const app = express();
+const path = require('path');
 const session = require('express-session');
+const db = require('./database'); // <— make sure to import this
+const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(session({
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  session({
     secret: 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // set to true if using HTTPS
-}));
+    cookie: { secure: false }, // change to true if HTTPS enforced
+  })
+);
+
+// ===========================
+// STATIC FRONTEND HANDLER
+// ===========================
+const frontendPath = path.join(__dirname, '../frontend');
+app.use(express.static(frontendPath));
+
+// Default route (login page)
 app.get('/', (req, res) => {
-    res.redirect('/login.html');
+  res.sendFile(path.join(frontendPath, 'login.html'));
 });
 
-app.use(express.static('../frontend'));  // Fixed path to frontend
+// ===========================
+// ROUTES
+// ===========================
+const authRoutes = require('./routes/auth');
+const fileRoutes = require('./routes/files');
+const userRoutes = require('./routes/users');
 
-// Import routes
-const authRoutes = require('./routes/auth');  // Fixed path
-const fileRoutes = require('./routes/files'); // Fixed path  
-const userRoutes = require('./routes/users'); // Fixed path
-
-// Use routes
 app.use('/api', authRoutes);
 app.use('/api', fileRoutes);
 app.use('/api', userRoutes);
-// User info route
+
+// ===========================
+// USER INFO + LOGOUT
+// ===========================
 app.get('/api/user-info', (req, res) => {
-    if (!req.session.userId) {
-        return res.json({ success: false });
-    }
+  if (!req.session.userId) return res.json({ success: false });
 
-    // You'll need to implement getUserById in your database.js
-    db.getUserById(req.session.userId, (err, user) => {
-        if (err || !user) {
-            return res.json({ success: false });
-        }
-        res.json({ success: true, user: { name: user.name, email: user.email } });
-    });
+  db.getUserById(req.session.userId, (err, user) => {
+    if (err || !user) return res.json({ success: false });
+    res.json({ success: true, user: { name: user.name, email: user.email } });
+  });
 });
 
-// Logout route
 app.post('/api/logout', (req, res) => {
-    req.session.destroy();
+  req.session.destroy(() => {
     res.json({ success: true, message: 'Logged out successfully' });
+  });
 });
-// Start server
-app.listen(3000, () => {
-    console.log('Server running on port 3000');
+
+// ===========================
+// SERVER START
+// ===========================
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
