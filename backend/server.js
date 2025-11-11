@@ -24,7 +24,7 @@ app.use(express.static(frontendPath));
 
 // Default route (login page)
 app.get('/', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'login.html'));
+  res.sendFile(path.join(frontendPath, '/login.html'));
 });
 
 // ===========================
@@ -63,5 +63,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
+
 
 
